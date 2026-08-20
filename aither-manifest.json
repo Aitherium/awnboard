@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1",
+  "name": "awnboard",
+  "description": "A front gate you can put in front of anything, and hand someone the key to.",
+  "url": "https://aitherium.github.io/awnboard/",
+  "repository": "https://github.com/Aitherium/awnboard",
+  "kind": "tool",
+  "status": "public",
+  "adopt": "Put a gate in front of one URL and let exactly one person through it with a code you sent them.",
+  "pairs_with": [
+    "awnest",
+    "awiam",
+    "awbac",
+    "awdit",
+    "awseal",
+    "awshare",
+    "awtunnel",
+    "awnet",
+    "awdk",
+    "awmail"
+  ],
+  "includes": []
+}

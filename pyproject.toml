@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "awnboard"
+version = "0.1.0"
+description = "A front gate you can put in front of anything - invitations that name their recipient, a ladder of requirements, and grants you can revoke one at a time."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+# A human check at the gate. Optional on purpose: a gate with a passcode and an
+# invitation is useful on its own, and requiring a sibling to be adoptable would
+# make this a subsystem rather than a brick.
+human = ["awnest>=0.1.0"]
+ed25519 = ["cryptography>=41.0"]
+
+[project.scripts]
+awnboard = "awnboard.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Aitherium/awnboard"
+Documentation = "https://github.com/Aitherium/awnboard#readme"
+Repository = "https://github.com/Aitherium/awnboard.git"
+Issues = "https://github.com/Aitherium/awnboard/issues"
+
+[tool.setuptools]
+packages = ["awnboard"]
+license-files = ["LICENSE"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+# The monorepo quality gate runs `ruff --isolated` from the REPO ROOT, where
+# first-party detection cannot see this directory, so it files `awnboard` as
+# third-party. Rooted here, ruff would instead detect it as first-party and
+# demand the OPPOSITE import layout -- two invocations giving mutually
+# exclusive verdicts on the same file, each `--fix` undoing the other.
+# Measured: that is exactly what happened, twice, before this line existed.
+# Empty `src` disables path-based detection so the local run agrees with the
+# gate that actually blocks a merge.
+src = []
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501", "E402", "E741"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

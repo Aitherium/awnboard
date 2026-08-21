@@ -5,7 +5,7 @@
   "url": "https://aitherium.github.io/awnboard/",
   "repository": "https://github.com/Aitherium/awnboard",
   "kind": "tool",
-  "status": "no-pages",
+  "status": "public",
   "adopt": "Put a gate in front of one URL and let exactly one person through it with a code you sent them.",
   "pairs_with": [
     "awnest",

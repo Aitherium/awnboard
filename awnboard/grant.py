@@ -244,6 +244,43 @@ class GrantLedger:
     def is_revoked(self, invitation_id: str) -> bool:
         return invitation_id in self._read()["revoked"]
 
+    def all(self) -> list[dict[str, Any]]:
+        """Every grant this ledger knows: spent, revoked, or both.
+
+        Added 2026-09-18 because there was no way to ASK. The ledger has been
+        written on every admission since this brick shipped and read by nothing,
+        so an operator could not answer "who did I let in, and what is still
+        live?" without opening a JSON file on a container's disk -- which is how
+        a revocation feature ends up never being used.
+
+        Returns rows, never the invitation values (a ledger never holds them:
+        it stores ids, so this cannot leak a bearer credential by construction).
+        An unreadable ledger raises, exactly as `_read` does -- an empty list
+        would read as "nobody has ever been admitted", which is the same
+        dangerous lie `_read` already refuses to tell.
+        """
+        data = self._read()
+        used = data.get("used", {}) or {}
+        revoked = data.get("revoked", {}) or {}
+        rows: list[dict[str, Any]] = []
+        for iid in sorted(set(used) | set(revoked)):
+            u = used.get(iid) if isinstance(used.get(iid), dict) else {}
+            r = revoked.get(iid) if isinstance(revoked.get(iid), dict) else None
+            # `who` is the walk-through LOG (`[{who, at}, ...]`) that spend()
+            # appends, not a name -- the same structure history() returns.
+            who = u.get("who") or []
+            who = who if isinstance(who, list) else []
+            rows.append({
+                "id": iid,
+                "uses": int(u.get("count", 0) or 0),
+                "who": [str(w.get("who", "")) for w in who if isinstance(w, dict)],
+                "last_used_at": (who[-1].get("at") if who and isinstance(who[-1], dict) else None),
+                "revoked": r is not None,
+                "revoked_at": (r or {}).get("at"),
+                "revoked_reason": (r or {}).get("reason", ""),
+            })
+        return rows
+
     def spend(self, invitation_id: str, limit: int, who: str = "") -> bool:
         """Record one use. False when the invitation is spent or revoked.
 

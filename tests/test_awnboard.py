@@ -174,3 +174,44 @@ def test_a_passcode_digest_is_salted():
     assert hash_passcode("x", salt="a" * 16) != hash_passcode("x", salt="b" * 16)
     with pytest.raises(ValueError):
         hash_passcode("x", salt="")
+
+
+def test_grant_ledger_all_reports_spent_and_revoked(tmp_path):
+    """`all()` is the read half the ledger never had (2026-09-18).
+
+    It was written on every admission and read by nothing, so an operator could
+    not answer "who did I let in, and what is still live?" without opening a
+    JSON file on a container's disk -- which is how a revocation feature ends up
+    never being used.
+    """
+    from awnboard.grant import GrantLedger
+
+    led = GrantLedger(tmp_path / "grants.json")
+    assert led.all() == [], "an empty ledger is an empty list, not an error"
+
+    led.spend("inv1", 3, "a@x.com")
+    led.spend("inv1", 3, "b@x.com")
+    led.revoke("inv2", "left the company")
+
+    rows = {r["id"]: r for r in led.all()}
+    assert rows["inv1"]["uses"] == 2
+    # `who` is the walk-through log, flattened to the people -- not the raw
+    # {who, at} records, and never the invitation value (the ledger holds ids).
+    assert rows["inv1"]["who"] == ["a@x.com", "b@x.com"]
+    assert rows["inv1"]["last_used_at"] is not None
+    assert rows["inv1"]["revoked"] is False
+    assert rows["inv2"]["revoked"] is True
+    assert rows["inv2"]["revoked_reason"] == "left the company"
+    assert all("invitation" not in r and "token" not in r for r in led.all())
+
+
+def test_grant_ledger_all_refuses_an_unreadable_ledger(tmp_path):
+    """Empty would read as "nobody was ever admitted" -- the same dangerous lie
+    `_read` already refuses to tell."""
+    import pytest
+    from awnboard.grant import GrantLedger, InvitationError
+
+    p = tmp_path / "grants.json"
+    p.write_text("{not json", encoding="utf-8")
+    with pytest.raises(InvitationError):
+        GrantLedger(p).all()

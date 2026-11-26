@@ -4,7 +4,7 @@
 
 **[Docs](https://aitherium.github.io/awnboard/)**  ·  [Source](https://github.com/Aitherium/awnboard)  ·  `pip install awnboard`  ·  [The Aither World](https://aitherium.github.io/)
 
-> **The Aither World** is an operating system for agents — a Linux you can hand to one, the runtimes it works in, and the tools it works with. [awnix](https://github.com/Aitherium/awnix) is the Linux underneath it; **awnboard** is one of its 72 bricks — each installs on its own, runs offline, and needs no account. 6 more are in development and 19 are planned.
+> **The Aither World** is an operating system for agents — a Linux you can hand to one, the runtimes it works in, and the tools it works with. [awnix](https://github.com/Aitherium/awnix) is the Linux underneath it; **awnboard** is one of its 72 bricks — each installs on its own, runs offline, and needs no account. 6 more are in development and 23 are planned.
 >
 > **Start here:** Put a gate in front of one URL and let exactly one person through it with a code you sent them.
 
@@ -88,45 +88,6 @@ a rung that *raises* is unmet rather than a 500 somebody later wraps in a
 is installed, and is **unmet — not skipped** when it is not. A gate that quietly
 drops its strongest requirement because a dependency is missing is worse than one
 that refuses.
-
-### The access rungs
-
-Five more rungs turn a gate into an access broker: the question stops being "were
-you invited" and becomes "may THIS person, on THIS device, send THIS to THAT".
-
-```python
-Gate("app:wiki", target="https://wiki.internal", requirements=[
-    LiveSession(sessions),                            # still signed in, right now
-    RoleGranted(roles, "app:wiki:read"),              # their role covers this
-    DevicePosture(require={"disk_encrypted": True},   # the device is fit
-                  at_least={"patch_level": "2026-09-01"},
-                  max_age_s=3600),
-    EgressAllowed(allowlist),                         # where it is going is allowed
-    ContentClean(inspect),                            # what they are sending may leave
-])
-gate.admit({"session": token, "subject": user_id, "device": device_record,
-            "destination": "wiki.internal", "content": body})
-```
-
-Each rung is handed the thing that knows the answer and only asks it: a session
-store with `resolve(token)`, a role policy with `check(subject, permission)`, an
-allowlist with `check(host)`, a function that inspects bytes. No sibling is
-imported, so each works with whatever you already run.
-
-Three decisions are deliberate, and each is the opposite of a common default:
-
-- **Unreported is unmet.** A device that never said whether its disk is encrypted
-  has not got an encrypted disk. A posture check that passes the devices it knows
-  least about checks nothing.
-- **Too large is refused, not sampled.** Inspecting the first part of a body and
-  passing the rest is how a content filter gets walked around: the secret goes
-  after the cut.
-- **A yes must be a real yes.** A policy that answers with something merely
-  truthy — a tuple, a non-empty string — is unmet.
-
-Everything these rungs read must be put into `presented` by your code from an
-**authenticated** request. A gate that learns the device's state from a field the
-visitor typed believes whatever it is told.
 
 ## Refusals, for two audiences at once
 
@@ -270,7 +231,7 @@ Each installs on its own, works offline, and needs no account.
 | [awsettings](https://github.com/Aitherium/awsettings) | that you will remember to re-approve the same thing on every box you work from | one profile, unioned rather than overwritten, with the credentials left behind |
 | [awavatar](https://github.com/Aitherium/awavatar) | a cloud 3D vendor's opaque task id | a manifest with a sha256, a licence and a rig-audit verdict per file |
 
-[**awnix**](https://github.com/Aitherium/awnix) is the ground floor — A Linux you can hand to an agent — immutable base, capabilities included.
+[**awnix**](https://github.com/Aitherium/awnix) is the ground floor — A Linux you can hand to an agent — immutable x86_64 & ARM64 (aarch64) base, capabilities included.
 
 ## The Aitherium ecosystem
 
@@ -304,7 +265,7 @@ Every repository here is public. Each publishes an `aither-manifest.json` beside
 | [awnest](https://github.com/Aitherium/awnest) | Prove there is a human before you let them into the nest | [docs](https://aitherium.github.io/awnest/) |
 | [awrena](https://github.com/Aitherium/awrena) | Put two agents head to head and get a verdict you can check | [docs](https://aitherium.github.io/awrena/) |
 | **awnboard** _(you are here)_ | A front gate you can put in front of anything, and hand someone the key to | [docs](https://aitherium.github.io/awnboard/) |
-| [awnix](https://github.com/Aitherium/awnix) | A Linux you can hand to an agent — immutable base, capabilities included | [docs](https://aitherium.github.io/awnix/) |
+| [awnix](https://github.com/Aitherium/awnix) | A Linux you can hand to an agent — immutable x86_64 & ARM64 (aarch64) base, capabilities included | [docs](https://aitherium.github.io/awnix/) |
 | [awrecover](https://github.com/Aitherium/awrecover) | Labelled snapshots with an all-or-nothing restore | [docs](https://aitherium.github.io/awrecover/) |
 | [awstorage](https://github.com/Aitherium/awstorage) | Every drive on every node, indexed, classified and diffed -- so you can see what you own before you delete it | [docs](https://aitherium.github.io/awstorage/) |
 | [awrelay](https://github.com/Aitherium/awrelay) | Portable agent messaging — findings, alerts, coordination | [docs](https://aitherium.github.io/awrelay/) |

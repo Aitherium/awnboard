@@ -28,21 +28,27 @@ from awnboard.grant import (
 )
 from awnboard.requirements import (
     Check,
+    ContentClean,
+    DevicePosture,
+    EgressAllowed,
     Invited,
     KnownSubject,
+    LiveSession,
     Passcode,
     Requirement,
+    RoleGranted,
     VerifiedHuman,
     hash_passcode,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Gate", "Admission", "GateError",
     "invite", "read_invitation", "Invitation", "InvitationError",
     "Signer", "HmacSigner", "GrantLedger", "TOKEN_PREFIX",
     "Check", "Requirement", "Passcode", "Invited", "KnownSubject", "VerifiedHuman",
+    "LiveSession", "RoleGranted", "DevicePosture", "EgressAllowed", "ContentClean",
     "hash_passcode",
     "__version__",
 ]

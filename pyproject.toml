@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "awnboard"
-version = "0.1.0"
+version = "0.2.0"
 description = "A front gate you can put in front of anything - invitations that name their recipient, a ladder of requirements, and grants you can revoke one at a time."
 readme = "README.md"
 requires-python = ">=3.10"

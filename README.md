@@ -89,6 +89,45 @@ is installed, and is **unmet — not skipped** when it is not. A gate that quiet
 drops its strongest requirement because a dependency is missing is worse than one
 that refuses.
 
+### The access rungs
+
+Five more rungs turn a gate into an access broker: the question stops being "were
+you invited" and becomes "may THIS person, on THIS device, send THIS to THAT".
+
+```python
+Gate("app:wiki", target="https://wiki.internal", requirements=[
+    LiveSession(sessions),                            # still signed in, right now
+    RoleGranted(roles, "app:wiki:read"),              # their role covers this
+    DevicePosture(require={"disk_encrypted": True},   # the device is fit
+                  at_least={"patch_level": "2026-09-01"},
+                  max_age_s=3600),
+    EgressAllowed(allowlist),                         # where it is going is allowed
+    ContentClean(inspect),                            # what they are sending may leave
+])
+gate.admit({"session": token, "subject": user_id, "device": device_record,
+            "destination": "wiki.internal", "content": body})
+```
+
+Each rung is handed the thing that knows the answer and only asks it: a session
+store with `resolve(token)`, a role policy with `check(subject, permission)`, an
+allowlist with `check(host)`, a function that inspects bytes. No sibling is
+imported, so each works with whatever you already run.
+
+Three decisions are deliberate, and each is the opposite of a common default:
+
+- **Unreported is unmet.** A device that never said whether its disk is encrypted
+  has not got an encrypted disk. A posture check that passes the devices it knows
+  least about checks nothing.
+- **Too large is refused, not sampled.** Inspecting the first part of a body and
+  passing the rest is how a content filter gets walked around: the secret goes
+  after the cut.
+- **A yes must be a real yes.** A policy that answers with something merely
+  truthy — a tuple, a non-empty string — is unmet.
+
+Everything these rungs read must be put into `presented` by your code from an
+**authenticated** request. A gate that learns the device's state from a field the
+visitor typed believes whatever it is told.
+
 ## Refusals, for two audiences at once
 
 ```python
